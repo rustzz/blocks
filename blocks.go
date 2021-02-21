@@ -37,8 +37,8 @@ func New() *TwoBlocksDown {
 			ImageWidth:        250,
 		},
 		TextConfig: TextConfig{
-			MarginTop: MarginTop,
-			MarginBottom: MarginBottom,
+			MarginTop:		MarginTop,
+			MarginBottom:	MarginBottom,
 		},
 	}
 }
