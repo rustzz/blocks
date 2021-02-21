@@ -9,15 +9,16 @@ import (
 
 // get root path of project
 var (
-	_, b, _, _ = runtime.Caller(0)
-	basePath   = filepath.Dir(b)
+	_, b, _, _	= runtime.Caller(0)
+	basePath	= filepath.Dir(b)
+	fontName	= "times.ttf"
 )
 // ========================
 
 func (tbd *TwoBlocksDown) settingTopFont(outImage *gg.Context, text string, heightTextFrame int) (fontSize int, err error) {
 	fontSize = 10
 	for ;; {
-		if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/arial.ttf", basePath), float64(fontSize));
+		if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/%s", basePath, fontName), float64(fontSize));
 			err != nil {
 			return
 		}
@@ -32,7 +33,7 @@ func (tbd *TwoBlocksDown) settingTopFont(outImage *gg.Context, text string, heig
 			(heightTextFrame-int(heightText)) > -5 {
 			for ; outImage.Width() < int(widthText); {
 				fontSize -= 1
-				if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/arial.ttf", basePath), float64(fontSize));
+				if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/%s", basePath, fontName), float64(fontSize));
 					err != nil {
 					return
 				}
@@ -46,7 +47,7 @@ func (tbd *TwoBlocksDown) settingTopFont(outImage *gg.Context, text string, heig
 func (tbd *TwoBlocksDown) settingMiddleFont(outImage *gg.Context, text string, heightTextFrame int) (fontSize int, err error) {
 	fontSize = 10
 	for ;; {
-		if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/arial.ttf", basePath), float64(fontSize));
+		if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/%s", basePath, fontName), float64(fontSize));
 			err != nil {
 			return
 		}
@@ -61,7 +62,7 @@ func (tbd *TwoBlocksDown) settingMiddleFont(outImage *gg.Context, text string, h
 			(heightTextFrame-int(heightText)) > -5 {
 			for ; outImage.Width()/2 < int(widthText); {
 				fontSize -= 1
-				if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/arial.ttf", basePath), float64(fontSize));
+				if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/%s", basePath, fontName), float64(fontSize));
 					err != nil {
 					return
 				}
@@ -82,7 +83,7 @@ func (tbd *TwoBlocksDown) setTexts(outImage *gg.Context, texts []string) (*gg.Co
 		fontSize = 0
 	}
 
-	if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/arial.ttf", basePath), float64(fontSize));
+	if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/%s", basePath, fontName), float64(fontSize));
 		err != nil {
 		return outImage, err
 	}
@@ -104,7 +105,7 @@ func (tbd *TwoBlocksDown) setTexts(outImage *gg.Context, texts []string) (*gg.Co
 		fontSize = 0
 	}
 
-	if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/arial.ttf", basePath), float64(fontSize)); err != nil {
+	if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/%s", basePath, fontName), float64(fontSize)); err != nil {
 		return outImage, err
 	}
 
@@ -126,7 +127,7 @@ func (tbd *TwoBlocksDown) setTexts(outImage *gg.Context, texts []string) (*gg.Co
 		fontSize = 0
 	}
 
-	if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/arial.ttf", basePath), float64(fontSize)); err != nil {
+	if err = outImage.LoadFontFace(fmt.Sprintf("%s/fonts/%s", basePath, fontName), float64(fontSize)); err != nil {
 		return outImage, err
 	}
 
