@@ -41,7 +41,7 @@ func main() {
 	homeDir, _ := os.UserHomeDir()
 	tbd := blocks.New()
 	if _, err := tbd.Make(images, []string{
-		"place holder | place holder", "place holder | place holder", "place holder | place holder",
+		"PLACE HOLDER | place holder", "PLACE HOLDER | place holder", "PLACE HOLDER | place holder",
 	}, fmt.Sprintf("%s/out.png", homeDir)); err != nil {
 		log.Fatal(err)
 	}
