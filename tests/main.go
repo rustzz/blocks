@@ -26,21 +26,21 @@ func main() {
 		}
 		return
 	}()
-	images := func () (out []image.Image) {
+	images := func () (out []*image.Image) {
 		for _, imageReader := range imageReaders {
 			im, _, err := image.Decode(imageReader)
 			if err != nil {
 				log.Fatal(err)
 				return
 			}
-			out = append(out, im)
+			out = append(out, &im)
 		}
 		return
 	}()
 
 	homeDir, _ := os.UserHomeDir()
 	tbd := blocks.New()
-	if _, err := tbd.Make(images, []string{
+	if _, err := tbd.Make(&images, []string{
 		"PLACE HOLDER | place holder", "PLACE HOLDER | place holder", "PLACE HOLDER | place holder",
 	}, fmt.Sprintf("%s/out.png", homeDir)); err != nil {
 		log.Fatal(err)

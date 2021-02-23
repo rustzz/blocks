@@ -21,29 +21,27 @@ type TemplateConfig struct {
 
 type TwoBlocksDown struct {
 	OutImage			*gg.Context
-	TemplateConfig		TemplateConfig
-	TextConfig			TextConfig
+	TemplateConfig		*TemplateConfig
+	TextConfig			*TextConfig
 }
 
 func New() *TwoBlocksDown {
-	MarginTop := 10
-	MarginBottom := 10
 	return &TwoBlocksDown{
-		TemplateConfig: TemplateConfig{
+		TemplateConfig: &TemplateConfig{
 			LineWidth:         2,
 			TopLineHeight:     30,
 			MiddleLinesHeight: 30,
 			ImageHeight:       250,
 			ImageWidth:        250,
 		},
-		TextConfig: TextConfig{
-			MarginTop:		MarginTop,
-			MarginBottom:	MarginBottom,
+		TextConfig: &TextConfig{
+			MarginTop:		10,
+			MarginBottom:	10,
 		},
 	}
 }
 
-func saveImage(outImage *gg.Context, path string) (imageReader *bytes.Reader, err error) {
+func (tbd *TwoBlocksDown) saveImage(outImage *gg.Context, path string) (imageReader *bytes.Reader, err error) {
 	if len(path) != 0 {
 		err = outImage.SavePNG(path)
 		if err != nil {
@@ -61,16 +59,16 @@ func saveImage(outImage *gg.Context, path string) (imageReader *bytes.Reader, er
 	return
 }
 
-func (tbd *TwoBlocksDown) Make(srcImages []image.Image, texts []string, outPath string) (imageReader *bytes.Reader, err error) {
+func (tbd *TwoBlocksDown) Make(srcImages *[]*image.Image, texts []string, outPath string) (imageReader *bytes.Reader, err error) {
 	outImage := tbd.createTemplate()
-	outImage = tbd.placeSrcImages(outImage, srcImages)
+	outImage = tbd.placeSrcImages(outImage, *srcImages)
 	outImage, err = tbd.setTexts(outImage, texts)
 	if err != nil {
 		return
 	}
 
 	tbd.OutImage = outImage
-	imageReader, err = saveImage(outImage, outPath)
+	imageReader, err = tbd.saveImage(outImage, outPath)
 	if err != nil {
 		return
 	}

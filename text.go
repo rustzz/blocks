@@ -6,26 +6,25 @@ import (
 	"golang.org/x/image/font/gofont/goregular"
 )
 
+var (
+	font, _ = truetype.Parse(goregular.TTF)
+)
+
 func (tbd *TwoBlocksDown) settingTopFont(outImage *gg.Context, text string, heightTextFrame int) (fontSize int, err error) {
 	fontSize = 10
 	for ;; {
-		font, _ := truetype.Parse(goregular.TTF)
-		face := truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
-		outImage.SetFontFace(face)
+		faceFace := truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
+		outImage.SetFontFace(faceFace)
 
 		widthText, heightText := outImage.MeasureString(text)
-		if int(heightText) > heightTextFrame {
-			fontSize -= 1
-		}
-		if int(heightText) < heightTextFrame {
-			fontSize += 1
-		}
+		if int(heightText) > heightTextFrame { fontSize -= 1 }
+		if int(heightText) < heightTextFrame { fontSize += 1 }
 		if (heightTextFrame-int(heightText)) < 5 &&
 			(heightTextFrame-int(heightText)) > -5 {
 			for ; outImage.Width() < int(widthText); {
 				fontSize -= 1
-				face = truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
-				outImage.SetFontFace(face)
+				faceFace = truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
+				outImage.SetFontFace(faceFace)
 				widthText, heightText = outImage.MeasureString(text)
 			}
 			return
@@ -36,23 +35,18 @@ func (tbd *TwoBlocksDown) settingTopFont(outImage *gg.Context, text string, heig
 func (tbd *TwoBlocksDown) settingMiddleFont(outImage *gg.Context, text string, heightTextFrame int) (fontSize int, err error) {
 	fontSize = 10
 	for ;; {
-		font, _ := truetype.Parse(goregular.TTF)
-		face := truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
-		outImage.SetFontFace(face)
+		fontFace := truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
+		outImage.SetFontFace(fontFace)
 
 		widthText, heightText := outImage.MeasureString(text)
-		if int(heightText) > heightTextFrame {
-			fontSize -= 1
-		}
-		if int(heightText) < heightTextFrame {
-			fontSize += 1
-		}
+		if int(heightText) > heightTextFrame { fontSize -= 1 }
+		if int(heightText) < heightTextFrame { fontSize += 1 }
 		if (heightTextFrame - int(heightText)) < 5 &&
 			(heightTextFrame - int(heightText)) > -5 {
 			for ; outImage.Width() / 2 < int(widthText); {
 				fontSize -= 1
-				face = truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
-				outImage.SetFontFace(face)
+				fontFace = truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
+				outImage.SetFontFace(fontFace)
 				widthText, heightText = outImage.MeasureString(text)
 			}
 			return
@@ -61,20 +55,31 @@ func (tbd *TwoBlocksDown) settingMiddleFont(outImage *gg.Context, text string, h
 }
 
 func (tbd *TwoBlocksDown) setTexts(outImage *gg.Context, texts []string) (*gg.Context, error) {
-	font, _ := truetype.Parse(goregular.TTF)
 	outImage.SetHexColor("#000000")
 
-	fontSize, err := tbd.settingTopFont(outImage, texts[0], tbd.TemplateConfig.TopLineHeight)
+	fontSizeTop, err := tbd.settingTopFont(outImage, texts[0], tbd.TemplateConfig.TopLineHeight)
 	if err != nil {
 		return outImage, err
 	}
-	if fontSize < 10 {
-		fontSize = 0
-	}
+	if fontSizeTop < 10 { fontSizeTop = 0 }
 
-	face := truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
-	outImage.SetFontFace(face)
 
+	fontSizeLeft, err := tbd.settingMiddleFont(outImage, texts[1], tbd.TemplateConfig.MiddleLinesHeight)
+	if err != nil { return outImage, err }
+	fontSizeLeft -= 15
+	if fontSizeLeft < 10 { fontSizeLeft = 0 }
+
+
+	fontSizeRight, err := tbd.settingMiddleFont(outImage, texts[2], tbd.TemplateConfig.MiddleLinesHeight)
+	if err != nil { return outImage, err }
+	fontSizeRight -= 15
+	if fontSizeRight < 10 { fontSizeRight = 0 }
+
+	fontFaceTop := truetype.NewFace(font, &truetype.Options{Size: float64(fontSizeTop)})
+	fontFaceLeft := truetype.NewFace(font, &truetype.Options{Size: float64(fontSizeLeft)})
+	fontFaceRight := truetype.NewFace(font, &truetype.Options{Size: float64(fontSizeRight)})
+
+	outImage.SetFontFace(fontFaceTop)
 	widthTopText, heightTopText := outImage.MeasureString(texts[0])
 	outImage.DrawString(
 		texts[0],
@@ -83,18 +88,7 @@ func (tbd *TwoBlocksDown) setTexts(outImage *gg.Context, texts []string) (*gg.Co
 			int(heightTopText / 3)),
 	)
 
-	fontSize, err = tbd.settingMiddleFont(outImage, texts[1], tbd.TemplateConfig.MiddleLinesHeight)
-	if err != nil {
-		return outImage, err
-	}
-	fontSize -= 15
-	if fontSize < 10 {
-		fontSize = 0
-	}
-
-	face = truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
-	outImage.SetFontFace(face)
-
+	outImage.SetFontFace(fontFaceLeft)
 	widthLeftText, _ := outImage.MeasureString(texts[1])
 	outImage.DrawString(
 		texts[1],
@@ -104,18 +98,7 @@ func (tbd *TwoBlocksDown) setTexts(outImage *gg.Context, texts []string) (*gg.Co
 			((tbd.TemplateConfig.MiddleLinesHeight + tbd.TextConfig.MarginTop) / 2)),
 	)
 
-	fontSize, err = tbd.settingMiddleFont(outImage, texts[2], tbd.TemplateConfig.MiddleLinesHeight)
-	if err != nil {
-		return outImage, err
-	}
-	fontSize -= 15
-	if fontSize < 10 {
-		fontSize = 0
-	}
-
-	face = truetype.NewFace(font, &truetype.Options{Size: float64(fontSize)})
-	outImage.SetFontFace(face)
-
+	outImage.SetFontFace(fontFaceRight)
 	widthRightText, _ := outImage.MeasureString(texts[2])
 	outImage.DrawString(
 		texts[2],

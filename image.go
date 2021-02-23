@@ -53,14 +53,14 @@ func (tbd *TwoBlocksDown) resizeSrcImage(srcImage image.Image) image.Image {
 	)
 }
 
-func (tbd *TwoBlocksDown) placeSrcImages(outImage *gg.Context, srcImages []image.Image) *gg.Context {
+func (tbd *TwoBlocksDown) placeSrcImages(outImage *gg.Context, srcImages []*image.Image) *gg.Context {
 	outImage.DrawImage(
-		tbd.resizeSrcImage(srcImages[0]), 0,
+		tbd.resizeSrcImage(*srcImages[0]), 0,
 		tbd.TemplateConfig.TopLineHeight + tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom +
 			tbd.TemplateConfig.MiddleLinesHeight + (tbd.TemplateConfig.LineWidth * 2),
 	)
 	outImage.DrawImage(
-		tbd.resizeSrcImage(srcImages[1]),
+		tbd.resizeSrcImage(*srcImages[1]),
 		tbd.TemplateConfig.ImageWidth + tbd.TemplateConfig.LineWidth,
 		tbd.TemplateConfig.TopLineHeight+tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom +
 			tbd.TemplateConfig.MiddleLinesHeight + (tbd.TemplateConfig.LineWidth * 2),
