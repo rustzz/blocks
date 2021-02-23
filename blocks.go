@@ -44,15 +44,11 @@ func New() *TwoBlocksDown {
 func (tbd *TwoBlocksDown) saveImage(outImage *gg.Context, path string) (imageReader *bytes.Reader, err error) {
 	if len(path) != 0 {
 		err = outImage.SavePNG(path)
-		if err != nil {
-			return
-		}
+		if err != nil { return }
 	} else {
 		imageBuffer := new(bytes.Buffer)
 		err = outImage.EncodePNG(imageBuffer)
-		if err != nil {
-			return
-		}
+		if err != nil { return }
 		imageReader = bytes.NewReader(imageBuffer.Bytes())
 		return
 	}
@@ -63,14 +59,10 @@ func (tbd *TwoBlocksDown) Make(srcImages *[]*image.Image, texts []string, outPat
 	outImage := tbd.createTemplate()
 	outImage = tbd.placeSrcImages(outImage, *srcImages)
 	outImage, err = tbd.setTexts(outImage, texts)
-	if err != nil {
-		return
-	}
+	if err != nil { return }
 
 	tbd.OutImage = outImage
 	imageReader, err = tbd.saveImage(outImage, outPath)
-	if err != nil {
-		return
-	}
+	if err != nil { return }
 	return
 }
