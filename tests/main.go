@@ -5,44 +5,60 @@ import (
 	"fmt"
 	"github.com/rustzz/blocks"
 	"image"
+	"image/png"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 )
 
+var (
+	urls = [2]string{
+		"https://2ch.hk/makaba/templates/img/anon.jpg",
+		"https://2ch.hk/makaba/templates/img/anon.jpg",
+	}
+	texts = [3]string{"cum CUM", "cum CUM", "cum CUM"}
+)
+
+func GetImage(url string) (outImage image.Image, err error) {
+	resp, err := http.Get(url)
+	if err != nil { return }
+	defer resp.Body.Close()
+
+	imageBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil { return }
+
+	imageBuffer := bytes.NewBuffer(imageBytes)
+	outImage, _, err = image.Decode(imageBuffer)
+	if err != nil { return }
+	return
+}
+
+func FromConstructor() (imageBuffer *bytes.Buffer, err error) {
+	srcImages, err := func () (out [2]image.Image, err error) {
+		for index, url := range urls {
+			out[index], err = GetImage(url)
+			if err != nil { return }
+		}
+		return
+	}()
+	if err != nil { return }
+	dem := blocks.New(srcImages, texts)
+	imageBuffer, err = dem.Make()
+	if err != nil { return }
+	return
+}
 
 func main() {
-	urls := []string{
-		"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Placeholder_no_text.svg/768px-Placeholder_no_text.svg.png",
-		"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Placeholder_no_text.svg/768px-Placeholder_no_text.svg.png",
-	}
-	imageReaders := func () (out []*bytes.Reader) {
-		for _, url := range urls {
-			imageReader, err := blocks.LoadSrcImageFromURL(url)
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
-			out = append(out, imageReader)
-		}
-		return
-	}()
-	images := func () (out []*image.Image) {
-		for _, imageReader := range imageReaders {
-			im, _, err := image.Decode(imageReader)
-			if err != nil {
-				log.Fatal(err)
-				return
-			}
-			out = append(out, &im)
-		}
-		return
-	}()
+	imageBuffer, err := FromConstructor()
+	if err != nil { log.Fatal(err) }
 
-	homeDir, _ := os.UserHomeDir()
-	tbd := blocks.New()
-	if _, err := tbd.Make(&images, []string{
-		"PLACE HOLDER | place holder", "PLACE HOLDER | place holder", "PLACE HOLDER | place holder",
-	}, fmt.Sprintf("%s/out.png", homeDir)); err != nil {
-		log.Fatal(err)
-	}
+	homeDir, err := os.UserHomeDir()
+	file, err := os.Create(fmt.Sprintf("%s/out1.png", homeDir))
+	if err != nil { log.Fatal(err) }
+	defer file.Close()
+
+	im, _, err := image.Decode(imageBuffer)
+	if err != nil { log.Fatal(err) }
+	if err = png.Encode(file, im); err != nil { log.Fatal(err) }
 }

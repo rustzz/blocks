@@ -2,67 +2,52 @@ package blocks
 
 import (
 	"bytes"
-	"github.com/fogleman/gg"
 	"image"
 )
 
-type TextConfig struct {
-	MarginTop			int
-	MarginBottom		int
-}
-
-type TemplateConfig struct {
-	LineWidth			int
-	TopLineHeight		int
-	MiddleLinesHeight	int
-	ImageHeight			int
-	ImageWidth			int
-}
-
-type TwoBlocksDown struct {
-	OutImage			*gg.Context
-	TemplateConfig		*TemplateConfig
-	TextConfig			*TextConfig
-}
-
-func New() *TwoBlocksDown {
-	return &TwoBlocksDown{
-		TemplateConfig: &TemplateConfig{
-			LineWidth:         2,
-			TopLineHeight:     30,
-			MiddleLinesHeight: 30,
-			ImageHeight:       250,
-			ImageWidth:        250,
+func New(srcImages [2]image.Image, texts [3]string) *Blocks {
+	return &Blocks{
+		TemplateConfig: &Template{
+			TextConfig: &Text{
+				Texts: texts,
+				FontConfig: &Font{},
+			},
+			FrameConfig: &Frame{
+				LineWidth: 2,
+				TopHeight: 30,
+				MiddleHeight: 30,
+				ImageWidth: 250,
+				ImageHeight: 250,
+			},
 		},
-		TextConfig: &TextConfig{
-			MarginTop:		10,
-			MarginBottom:	10,
+		SrcImagesConfig: &SrcImages{
+			LeftImage: &SrcImage{
+				Image: srcImages[0],
+				Width: srcImages[0].Bounds().Size().X,
+				Height: srcImages[0].Bounds().Size().Y,
+			},
+			RightImage: &SrcImage{
+				Image: srcImages[1],
+				Width: srcImages[1].Bounds().Size().X,
+				Height: srcImages[1].Bounds().Size().Y,
+			},
 		},
 	}
 }
 
-func (tbd *TwoBlocksDown) saveImage(outImage *gg.Context, path string) (imageReader *bytes.Reader, err error) {
-	if len(path) != 0 {
-		err = outImage.SavePNG(path)
-		if err != nil { return }
-	} else {
-		imageBuffer := new(bytes.Buffer)
-		err = outImage.EncodePNG(imageBuffer)
-		if err != nil { return }
-		imageReader = bytes.NewReader(imageBuffer.Bytes())
-		return
-	}
+func (blocks *Blocks) GetImageBuffer() (imageBuffer *bytes.Buffer, err error) {
+	imageBuffer = &bytes.Buffer{}
+	if err = blocks.TemplateConfig.Image.EncodePNG(imageBuffer); err != nil { return }
 	return
 }
 
-func (tbd *TwoBlocksDown) Make(srcImages *[]*image.Image, texts []string, outPath string) (imageReader *bytes.Reader, err error) {
-	outImage := tbd.createTemplate()
-	outImage = tbd.placeSrcImages(outImage, *srcImages)
-	outImage, err = tbd.setTexts(outImage, texts)
-	if err != nil { return }
+func (blocks *Blocks) Make() (imageBuffer *bytes.Buffer, err error) {
+	blocks.TemplateConfig.RenderTemplate()
+	blocks.RenderSrcImage()
+	if err = blocks.TemplateConfig.RenderTexts(); err != nil { return }
 
-	tbd.OutImage = outImage
-	imageReader, err = tbd.saveImage(outImage, outPath)
+	imageBuffer, err = blocks.GetImageBuffer()
 	if err != nil { return }
 	return
 }
+

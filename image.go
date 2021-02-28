@@ -2,75 +2,98 @@ package blocks
 
 import (
 	"github.com/fogleman/gg"
-	"image"
 	"github.com/nfnt/resize"
 )
 
-func (tbd *TwoBlocksDown) makeTemplateImage() (templateImage *gg.Context) {
-	templateWidth := (tbd.TemplateConfig.ImageWidth * 2) + tbd.TemplateConfig.LineWidth
-	templateHeight := (tbd.TemplateConfig.LineWidth * 2) + (tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom) +
-		tbd.TemplateConfig.MiddleLinesHeight + tbd.TemplateConfig.TopLineHeight + tbd.TemplateConfig.ImageHeight
-	templateImage = gg.NewContext(templateWidth, templateHeight)
-	return
+func (template *Template) makeTemplateImage() {
+	templateWidth := (template.FrameConfig.ImageWidth * 2) +
+		template.FrameConfig.LineWidth
+	templateHeight := (template.FrameConfig.LineWidth * 2) +
+		(template.TextConfig.MarginTop + template.TextConfig.MarginBottom) +
+		template.FrameConfig.MiddleHeight + template.FrameConfig.TopHeight +
+		template.FrameConfig.ImageHeight
+	template.Image = gg.NewContext(templateWidth, templateHeight)
 }
 
-func (tbd *TwoBlocksDown) fillBackground(template *gg.Context) *gg.Context {
-	template.SetHexColor("#ffffff")
-	template.DrawRectangle(
+func (template *Template) fillBackground() {
+	template.Image.SetHexColor("#ffffff")
+	template.Image.DrawRectangle(
 		0, 0,
-		float64(template.Width()), float64(template.Height()),
+		float64(template.Image.Width()),
+		float64(template.Image.Height()),
 	)
-	template.Fill()
-	return template
+	template.Image.Fill()
 }
 
-func (tbd *TwoBlocksDown) drawFrame(template *gg.Context) *gg.Context {
-	template.SetHexColor("#000000")
-	template.DrawRectangle(
-		float64((template.Width() / 2) - (tbd.TemplateConfig.LineWidth / 2)),
-		float64(tbd.TemplateConfig.TopLineHeight + tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom),
-		float64(tbd.TemplateConfig.LineWidth), float64(template.Height()),
+func (template *Template) drawFrame() {
+	template.Image.SetHexColor("#000000")
+	template.Image.DrawRectangle(
+		float64((template.Image.Width() / 2) -
+			(template.FrameConfig.LineWidth / 2)),
+		float64(template.FrameConfig.TopHeight +
+			template.TextConfig.MarginTop +
+			template.TextConfig.MarginBottom),
+		float64(template.FrameConfig.LineWidth),
+		float64(template.Image.Height()),
 	)
-	template.Fill()
-	template.DrawRectangle(
-		0, float64(tbd.TemplateConfig.TopLineHeight + tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom),
-		float64(template.Width()), float64(tbd.TemplateConfig.LineWidth),
+	template.Image.Fill()
+	template.Image.DrawRectangle(
+		0, float64(template.FrameConfig.TopHeight +
+			template.TextConfig.MarginTop +
+			template.TextConfig.MarginBottom),
+		float64(template.Image.Width()),
+		float64(template.FrameConfig.LineWidth),
 	)
-	template.Fill()
-	template.DrawRectangle(
-		0, float64(tbd.TemplateConfig.TopLineHeight + tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom +
-			tbd.TemplateConfig.LineWidth + tbd.TemplateConfig.MiddleLinesHeight),
-		float64(template.Width()), float64(tbd.TemplateConfig.LineWidth),
+	template.Image.Fill()
+	template.Image.DrawRectangle(
+		0, float64(template.FrameConfig.TopHeight +
+			template.TextConfig.MarginTop +
+			template.TextConfig.MarginBottom +
+			template.FrameConfig.LineWidth +
+			template.FrameConfig.MiddleHeight),
+		float64(template.Image.Width()),
+		float64(template.FrameConfig.LineWidth),
 	)
-	template.Fill()
-	return template
+	template.Image.Fill()
 }
 
-func (tbd *TwoBlocksDown) resizeSrcImage(srcImage image.Image) image.Image {
-	return resize.Resize(
-		uint(tbd.TemplateConfig.ImageWidth), uint(tbd.TemplateConfig.ImageHeight),
-		srcImage, resize.Lanczos3,
+func (blocks *Blocks) resizeSrcImages() {
+	blocks.SrcImagesConfig.LeftImage.Image = resize.Resize(
+		uint(blocks.TemplateConfig.FrameConfig.ImageWidth),
+		uint(blocks.TemplateConfig.FrameConfig.ImageHeight),
+		blocks.SrcImagesConfig.LeftImage.Image, resize.Lanczos3,
+	)
+	blocks.SrcImagesConfig.RightImage.Image = resize.Resize(
+		uint(blocks.TemplateConfig.FrameConfig.ImageWidth),
+		uint(blocks.TemplateConfig.FrameConfig.ImageHeight),
+		blocks.SrcImagesConfig.RightImage.Image, resize.Lanczos3,
 	)
 }
 
-func (tbd *TwoBlocksDown) placeSrcImages(outImage *gg.Context, srcImages []*image.Image) *gg.Context {
-	outImage.DrawImage(
-		tbd.resizeSrcImage(*srcImages[0]), 0,
-		tbd.TemplateConfig.TopLineHeight + tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom +
-			tbd.TemplateConfig.MiddleLinesHeight + (tbd.TemplateConfig.LineWidth * 2),
-	)
-	outImage.DrawImage(
-		tbd.resizeSrcImage(*srcImages[1]),
-		tbd.TemplateConfig.ImageWidth + tbd.TemplateConfig.LineWidth,
-		tbd.TemplateConfig.TopLineHeight+tbd.TextConfig.MarginTop + tbd.TextConfig.MarginBottom +
-			tbd.TemplateConfig.MiddleLinesHeight + (tbd.TemplateConfig.LineWidth * 2),
-	)
-	return outImage
+func (template *Template) RenderTemplate() {
+	template.makeTemplateImage()
+	template.fillBackground()
+	template.drawFrame()
 }
 
-func (tbd *TwoBlocksDown) createTemplate() (template *gg.Context) {
-	template = tbd.makeTemplateImage()
-	template = tbd.fillBackground(template)
-	template = tbd.drawFrame(template)
-	return
+func (blocks *Blocks) RenderSrcImage() {
+	blocks.resizeSrcImages()
+	blocks.TemplateConfig.Image.DrawImage(
+		blocks.SrcImagesConfig.LeftImage.Image, 0,
+		blocks.TemplateConfig.FrameConfig.TopHeight+
+			blocks.TemplateConfig.TextConfig.MarginTop+
+			blocks.TemplateConfig.TextConfig.MarginBottom+
+			blocks.TemplateConfig.FrameConfig.MiddleHeight+
+			(blocks.TemplateConfig.FrameConfig.LineWidth*2),
+	)
+	blocks.TemplateConfig.Image.DrawImage(
+		blocks.SrcImagesConfig.RightImage.Image,
+		blocks.TemplateConfig.FrameConfig.ImageWidth +
+			blocks.TemplateConfig.FrameConfig.LineWidth,
+		blocks.TemplateConfig.FrameConfig.TopHeight+
+			blocks.TemplateConfig.TextConfig.MarginTop+
+			blocks.TemplateConfig.TextConfig.MarginBottom+
+			blocks.TemplateConfig.FrameConfig.MiddleHeight+
+			(blocks.TemplateConfig.FrameConfig.LineWidth*2),
+	)
 }
