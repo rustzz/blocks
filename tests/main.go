@@ -34,7 +34,7 @@ func GetImage(url string) (outImage image.Image, err error) {
 	return
 }
 
-func FromConstructor() (imageBuffer *bytes.Buffer, err error) {
+func FromConstructor() (imgBytes []byte, err error) {
 	srcImages, err := func () (out [2]image.Image, err error) {
 		for index, url := range urls {
 			out[index], err = GetImage(url)
@@ -44,13 +44,13 @@ func FromConstructor() (imageBuffer *bytes.Buffer, err error) {
 	}()
 	if err != nil { return }
 	dem := blocks.New(srcImages, texts)
-	imageBuffer, err = dem.Make()
+	imgBytes, err = dem.Make()
 	if err != nil { return }
 	return
 }
 
 func main() {
-	imageBuffer, err := FromConstructor()
+	imgBytes, err := FromConstructor()
 	if err != nil { log.Fatal(err) }
 
 	homeDir, err := os.UserHomeDir()
@@ -58,7 +58,8 @@ func main() {
 	if err != nil { log.Fatal(err) }
 	defer file.Close()
 
-	im, _, err := image.Decode(imageBuffer)
+	imgBuffer := bytes.NewBuffer(imgBytes)
+	im, _, err := image.Decode(imgBuffer)
 	if err != nil { log.Fatal(err) }
 	if err = png.Encode(file, im); err != nil { log.Fatal(err) }
 }

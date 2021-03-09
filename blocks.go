@@ -35,19 +35,20 @@ func New(srcImages [2]image.Image, texts [3]string) *Blocks {
 	}
 }
 
-func (blocks *Blocks) GetImageBuffer() (imageBuffer *bytes.Buffer, err error) {
-	imageBuffer = &bytes.Buffer{}
-	if err = blocks.TemplateConfig.Image.EncodePNG(imageBuffer); err != nil { return }
+func (blocks *Blocks) GetImageBuffer() (imgBuffer *bytes.Buffer, err error) {
+	imgBuffer = &bytes.Buffer{}
+	if err = blocks.TemplateConfig.Image.EncodePNG(imgBuffer); err != nil { return }
 	return
 }
 
-func (blocks *Blocks) Make() (imageBuffer *bytes.Buffer, err error) {
+func (blocks *Blocks) Make() (imgBytes []byte, err error) {
 	blocks.TemplateConfig.RenderTemplate()
 	blocks.RenderSrcImage()
 	if err = blocks.TemplateConfig.RenderTexts(); err != nil { return }
 
-	imageBuffer, err = blocks.GetImageBuffer()
+	imgBuffer, err := blocks.GetImageBuffer()
 	if err != nil { return }
+	imgBytes = imgBuffer.Bytes()
 	return
 }
 
